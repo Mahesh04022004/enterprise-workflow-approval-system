@@ -1,0 +1,1 @@
+The Enterprise Workflow Approval System is a configurable platform that enables organizations to manage employee-generated requests and dynamically route them through sequential, condition-based approval workflows while ensuring auditability, security, and role-based access control.
