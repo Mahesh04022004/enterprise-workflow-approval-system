@@ -2,6 +2,7 @@ package com.example.workflow.services;
 
 import com.example.workflow.entities.Role;
 import com.example.workflow.entities.User;
+import com.example.workflow.exceptions.BadRequestException;
 import com.example.workflow.repositories.RoleRepository;
 import com.example.workflow.repositories.UserRepository;
 import org.springframework.stereotype.Service;
@@ -21,11 +22,11 @@ public class UserService {
     public User registerUser(User user) {
 
         if (userRepository.findByEmail(user.getEmail()).isPresent()) {
-            throw new RuntimeException("Email already exists");
+            throw new BadRequestException("Email already exists");
         }
 
         Role employeeRole = roleRepository.findByName("EMPLOYEE")
-                .orElseThrow(() -> new RuntimeException("Role not found"));
+                .orElseThrow(() -> new BadRequestException("Role not found"));
 
         user.getRoles().add(employeeRole);
 

@@ -1,7 +1,9 @@
 package com.example.workflow.controller;
 
 import com.example.workflow.entities.Expense;
+import com.example.workflow.payload.ApiResponse;
 import com.example.workflow.services.ExpenseService;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -15,17 +17,38 @@ public class ExpenseController {
     }
 
     @PostMapping("/create/{userId}")
-    public Expense createExpense(@PathVariable Long userId,
-                                 @RequestBody Expense expense) {
-        return expenseService.createExpense(userId, expense);
-    }
-    @PutMapping("/{id}/approve")
-    public Expense approveExpense(@PathVariable Long id) {
-        return expenseService.approveExpense(id);
+    public ResponseEntity<ApiResponse<Expense>> createExpense(
+            @PathVariable Long userId,
+            @RequestBody Expense expense) {
+
+        Expense savedExpense = expenseService.createExpense(userId, expense);
+
+        return ResponseEntity.ok(
+                new ApiResponse<>(true, "Expense created successfully", savedExpense)
+        );
     }
 
+
+    @PutMapping("/{id}/approve")
+    public ResponseEntity<ApiResponse<Expense>> approveExpense(
+            @PathVariable Long id) {
+
+        Expense updatedExpense = expenseService.approveExpense(id);
+
+        return ResponseEntity.ok(
+                new ApiResponse<>(true, "Expense approved successfully", updatedExpense)
+        );
+    }
+
+
     @PutMapping("/{id}/reject")
-    public Expense rejectExpense(@PathVariable Long id) {
-        return expenseService.rejectExpense(id);
+    public ResponseEntity<ApiResponse<Expense>> rejectExpense(
+            @PathVariable Long id) {
+
+        Expense updatedExpense = expenseService.rejectExpense(id);
+
+        return ResponseEntity.ok(
+                new ApiResponse<>(true, "Expense rejected successfully", updatedExpense)
+        );
     }
 }

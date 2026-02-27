@@ -1,7 +1,9 @@
 package com.example.workflow.controller;
 
 import com.example.workflow.entities.User;
+import com.example.workflow.payload.ApiResponse;
 import com.example.workflow.services.UserService;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -15,7 +17,13 @@ public class UserController {
     }
 
     @PostMapping("/register")
-    public User register(@RequestBody User user) {
-        return userService.registerUser(user);
+    public ResponseEntity<ApiResponse<User>> register(
+            @RequestBody User user) {
+
+        User savedUser = userService.registerUser(user);
+
+        return ResponseEntity.ok(
+                new ApiResponse<>(true, "User registered successfully", savedUser)
+        );
     }
 }

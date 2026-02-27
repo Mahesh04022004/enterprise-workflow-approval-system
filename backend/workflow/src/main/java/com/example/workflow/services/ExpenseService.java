@@ -2,6 +2,8 @@ package com.example.workflow.services;
 
 import com.example.workflow.entities.Expense;
 import com.example.workflow.entities.User;
+import com.example.workflow.exceptions.BadRequestException;
+import com.example.workflow.exceptions.ResourceNotFoundException;
 import com.example.workflow.repositories.ExpenseRepository;
 import com.example.workflow.repositories.UserRepository;
 import org.springframework.stereotype.Service;
@@ -22,7 +24,7 @@ public class ExpenseService {
     public Expense createExpense(Long userId, Expense expense) {
 
         User user = userRepository.findById(userId)
-                .orElseThrow(() -> new RuntimeException("User not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("User not found"));
 
         expense.setUser(user);
 
@@ -31,9 +33,9 @@ public class ExpenseService {
 
     public Expense approveExpense(Long expenseId) {
         Expense expense = expenseRepository.findById(expenseId)
-                .orElseThrow(() -> new RuntimeException("Expense not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Expense not found"));
         if (expense.getStatus() != ExpenseStatus.PENDING) {
-            throw new RuntimeException("Expense already processed");
+            throw new BadRequestException("Expense already processed");
         }
         expense.setStatus(ExpenseStatus.APPROVED);
         return expenseRepository.save(expense);
@@ -41,9 +43,9 @@ public class ExpenseService {
 
     public Expense rejectExpense(Long expenseId) {
         Expense expense = expenseRepository.findById(expenseId)
-                .orElseThrow(() -> new RuntimeException("Expense not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Expense not found"));
         if (expense.getStatus() != ExpenseStatus.PENDING) {
-            throw new RuntimeException("Expense already processed");
+            throw new BadRequestException("Expense already processed");
         }
         expense.setStatus(ExpenseStatus.REJECTED);
         return expenseRepository.save(expense);
