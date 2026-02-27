@@ -5,6 +5,7 @@ import com.example.workflow.entities.User;
 import com.example.workflow.repositories.ExpenseRepository;
 import com.example.workflow.repositories.UserRepository;
 import org.springframework.stereotype.Service;
+import com.example.workflow.enums.ExpenseStatus;
 
 @Service
 public class ExpenseService {
@@ -25,6 +26,26 @@ public class ExpenseService {
 
         expense.setUser(user);
 
+        return expenseRepository.save(expense);
+    }
+
+    public Expense approveExpense(Long expenseId) {
+        Expense expense = expenseRepository.findById(expenseId)
+                .orElseThrow(() -> new RuntimeException("Expense not found"));
+        if (expense.getStatus() != ExpenseStatus.PENDING) {
+            throw new RuntimeException("Expense already processed");
+        }
+        expense.setStatus(ExpenseStatus.APPROVED);
+        return expenseRepository.save(expense);
+    }
+
+    public Expense rejectExpense(Long expenseId) {
+        Expense expense = expenseRepository.findById(expenseId)
+                .orElseThrow(() -> new RuntimeException("Expense not found"));
+        if (expense.getStatus() != ExpenseStatus.PENDING) {
+            throw new RuntimeException("Expense already processed");
+        }
+        expense.setStatus(ExpenseStatus.REJECTED);
         return expenseRepository.save(expense);
     }
 }

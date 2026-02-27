@@ -19,4 +19,13 @@ public class ExpenseController {
                                  @RequestBody Expense expense) {
         return expenseService.createExpense(userId, expense);
     }
+    @PutMapping("/{id}/approve")
+    public Expense approveExpense(@PathVariable Long id) {
+        return expenseService.approveExpense(id);
+    }
+
+    @PutMapping("/{id}/reject")
+    public Expense rejectExpense(@PathVariable Long id) {
+        return expenseService.rejectExpense(id);
+    }
 }
