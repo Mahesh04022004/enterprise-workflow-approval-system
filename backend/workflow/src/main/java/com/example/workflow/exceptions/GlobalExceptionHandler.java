@@ -1,7 +1,9 @@
 package com.example.workflow.exceptions;
 
 import com.example.workflow.payload.ApiResponse;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.web.bind.annotation.*;
 
 @RestControllerAdvice
@@ -25,5 +27,12 @@ public class GlobalExceptionHandler {
         return ResponseEntity
                 .badRequest()
                 .body(new ApiResponse<>(false, ex.getMessage(), null));
+    }
+    @ExceptionHandler(AccessDeniedException.class)
+    public ResponseEntity<ApiResponse<Object>> handleAccessDenied(
+            AccessDeniedException ex) {
+
+        return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                .body(new ApiResponse<>(false, "Access denied", null));
     }
 }

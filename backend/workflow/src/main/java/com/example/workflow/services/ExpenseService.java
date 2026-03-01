@@ -8,7 +8,8 @@ import com.example.workflow.repositories.ExpenseRepository;
 import com.example.workflow.repositories.UserRepository;
 import org.springframework.stereotype.Service;
 import com.example.workflow.enums.ExpenseStatus;
-
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UserDetails;
 import java.util.List;
 
 @Service
@@ -23,34 +24,28 @@ public class ExpenseService {
         this.userRepository = userRepository;
     }
 
-    public Expense createExpense(Long userId, Expense expense) {
+    public Expense createExpense(Expense expense) {
 
-        User user = userRepository.findById(userId)
+        String email = SecurityContextHolder.getContext()
+                .getAuthentication()
+                .getName();
+
+        User user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new ResourceNotFoundException("User not found"));
 
         expense.setUser(user);
+        expense.setStatus(ExpenseStatus.PENDING);
 
         return expenseRepository.save(expense);
     }
 
-    public Expense approveExpense(Long expenseId, Long approverId) {
+    public Expense approveExpense(Long expenseId) {
 
         Expense expense = expenseRepository.findById(expenseId)
                 .orElseThrow(() -> new ResourceNotFoundException("Expense not found"));
 
         if (expense.getStatus() != ExpenseStatus.PENDING) {
             throw new BadRequestException("Expense already processed");
-        }
-
-        User approver = userRepository.findById(approverId)
-                .orElseThrow(() -> new ResourceNotFoundException("Approver not found"));
-
-        boolean isManager = approver.getRoles()
-                .stream()
-                .anyMatch(role -> role.getName().equals("MANAGER"));
-
-        if (!isManager) {
-            throw new BadRequestException("Only MANAGER can approve expenses");
         }
 
         expense.setStatus(ExpenseStatus.APPROVED);
@@ -59,12 +54,16 @@ public class ExpenseService {
     }
 
     public Expense rejectExpense(Long expenseId) {
+
         Expense expense = expenseRepository.findById(expenseId)
                 .orElseThrow(() -> new ResourceNotFoundException("Expense not found"));
+
         if (expense.getStatus() != ExpenseStatus.PENDING) {
             throw new BadRequestException("Expense already processed");
         }
+
         expense.setStatus(ExpenseStatus.REJECTED);
+
         return expenseRepository.save(expense);
     }
 

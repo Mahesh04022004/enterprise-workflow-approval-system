@@ -19,48 +19,44 @@ public class ExpenseController {
         this.expenseService = expenseService;
     }
 
-
+    // EMPLOYEE creates expense for themselves
     @PreAuthorize("hasRole('EMPLOYEE')")
-    @PostMapping("/create/{userId}")
+    @PostMapping("/create")
     public ResponseEntity<ApiResponse<Expense>> createExpense(
-            @PathVariable Long userId,
             @RequestBody Expense expense) {
 
-        Expense savedExpense = expenseService.createExpense(userId, expense);
+        Expense savedExpense = expenseService.createExpense(expense);
 
         return ResponseEntity.ok(
                 new ApiResponse<>(true, "Expense created successfully", savedExpense)
         );
     }
 
-
+    // MANAGER approves
     @PreAuthorize("hasRole('MANAGER')")
-    @PutMapping("/{expenseId}/approve/{approverId}")
+    @PutMapping("/{expenseId}/approve")
     public ResponseEntity<ApiResponse<Expense>> approveExpense(
-            @PathVariable Long expenseId,
-            @PathVariable Long approverId) {
+            @PathVariable Long expenseId) {
 
-        Expense updatedExpense = expenseService.approveExpense(expenseId, approverId);
+        Expense updatedExpense = expenseService.approveExpense(expenseId);
 
         return ResponseEntity.ok(
                 new ApiResponse<>(true, "Expense approved successfully", updatedExpense)
         );
     }
 
-    // ✅ Only MANAGER can reject
     @PreAuthorize("hasRole('MANAGER')")
-    @PutMapping("/{id}/reject")
+    @PutMapping("/{expenseId}/reject")
     public ResponseEntity<ApiResponse<Expense>> rejectExpense(
-            @PathVariable Long id) {
+            @PathVariable Long expenseId) {
 
-        Expense updatedExpense = expenseService.rejectExpense(id);
+        Expense updatedExpense = expenseService.rejectExpense(expenseId);
 
         return ResponseEntity.ok(
                 new ApiResponse<>(true, "Expense rejected successfully", updatedExpense)
         );
     }
 
-    // ✅ Only MANAGER can see pending
     @PreAuthorize("hasRole('MANAGER')")
     @GetMapping("/pending")
     public ResponseEntity<ApiResponse<List<Expense>>> getPendingExpenses() {
