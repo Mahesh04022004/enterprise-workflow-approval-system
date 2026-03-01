@@ -4,6 +4,7 @@ import com.example.workflow.entities.Expense;
 import com.example.workflow.payload.ApiResponse;
 import com.example.workflow.services.ExpenseService;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -18,6 +19,8 @@ public class ExpenseController {
         this.expenseService = expenseService;
     }
 
+
+    @PreAuthorize("hasRole('EMPLOYEE')")
     @PostMapping("/create/{userId}")
     public ResponseEntity<ApiResponse<Expense>> createExpense(
             @PathVariable Long userId,
@@ -31,6 +34,7 @@ public class ExpenseController {
     }
 
 
+    @PreAuthorize("hasRole('MANAGER')")
     @PutMapping("/{expenseId}/approve/{approverId}")
     public ResponseEntity<ApiResponse<Expense>> approveExpense(
             @PathVariable Long expenseId,
@@ -43,7 +47,8 @@ public class ExpenseController {
         );
     }
 
-
+    // ✅ Only MANAGER can reject
+    @PreAuthorize("hasRole('MANAGER')")
     @PutMapping("/{id}/reject")
     public ResponseEntity<ApiResponse<Expense>> rejectExpense(
             @PathVariable Long id) {
@@ -54,6 +59,9 @@ public class ExpenseController {
                 new ApiResponse<>(true, "Expense rejected successfully", updatedExpense)
         );
     }
+
+    // ✅ Only MANAGER can see pending
+    @PreAuthorize("hasRole('MANAGER')")
     @GetMapping("/pending")
     public ResponseEntity<ApiResponse<List<Expense>>> getPendingExpenses() {
         List<Expense> pendingExpenses = expenseService.getPendingExpenses();
