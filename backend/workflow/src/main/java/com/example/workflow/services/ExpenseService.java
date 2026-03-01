@@ -9,6 +9,8 @@ import com.example.workflow.repositories.UserRepository;
 import org.springframework.stereotype.Service;
 import com.example.workflow.enums.ExpenseStatus;
 
+import java.util.List;
+
 @Service
 public class ExpenseService {
 
@@ -31,13 +33,28 @@ public class ExpenseService {
         return expenseRepository.save(expense);
     }
 
-    public Expense approveExpense(Long expenseId) {
+    public Expense approveExpense(Long expenseId, Long approverId) {
+
         Expense expense = expenseRepository.findById(expenseId)
                 .orElseThrow(() -> new ResourceNotFoundException("Expense not found"));
+
         if (expense.getStatus() != ExpenseStatus.PENDING) {
             throw new BadRequestException("Expense already processed");
         }
+
+        User approver = userRepository.findById(approverId)
+                .orElseThrow(() -> new ResourceNotFoundException("Approver not found"));
+
+        boolean isManager = approver.getRoles()
+                .stream()
+                .anyMatch(role -> role.getName().equals("MANAGER"));
+
+        if (!isManager) {
+            throw new BadRequestException("Only MANAGER can approve expenses");
+        }
+
         expense.setStatus(ExpenseStatus.APPROVED);
+
         return expenseRepository.save(expense);
     }
 
@@ -49,5 +66,9 @@ public class ExpenseService {
         }
         expense.setStatus(ExpenseStatus.REJECTED);
         return expenseRepository.save(expense);
+    }
+
+    public List<Expense> getPendingExpenses() {
+        return expenseRepository.findByStatus(ExpenseStatus.PENDING);
     }
 }

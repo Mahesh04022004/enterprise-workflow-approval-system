@@ -6,6 +6,8 @@ import com.example.workflow.services.ExpenseService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @RestController
 @RequestMapping("/api/expenses")
 public class ExpenseController {
@@ -29,11 +31,12 @@ public class ExpenseController {
     }
 
 
-    @PutMapping("/{id}/approve")
+    @PutMapping("/{expenseId}/approve/{approverId}")
     public ResponseEntity<ApiResponse<Expense>> approveExpense(
-            @PathVariable Long id) {
+            @PathVariable Long expenseId,
+            @PathVariable Long approverId) {
 
-        Expense updatedExpense = expenseService.approveExpense(id);
+        Expense updatedExpense = expenseService.approveExpense(expenseId, approverId);
 
         return ResponseEntity.ok(
                 new ApiResponse<>(true, "Expense approved successfully", updatedExpense)
@@ -49,6 +52,13 @@ public class ExpenseController {
 
         return ResponseEntity.ok(
                 new ApiResponse<>(true, "Expense rejected successfully", updatedExpense)
+        );
+    }
+    @GetMapping("/pending")
+    public ResponseEntity<ApiResponse<List<Expense>>> getPendingExpenses() {
+        List<Expense> pendingExpenses = expenseService.getPendingExpenses();
+        return ResponseEntity.ok(
+                new ApiResponse<>(true, "Pending expenses fetched successfully", pendingExpenses)
         );
     }
 }
